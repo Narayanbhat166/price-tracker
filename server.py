@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import requests
 
 app = Flask(__name__)
@@ -8,8 +8,13 @@ web_hook = 'https://price-tracker-bot.herokuapp.com/'
 
 
 def set_webhook():
-    method = 'setWebHook' + '?url=https://{}'.format(web_hook)
-    response = requests.get(bot_url + method)
+    method = 'deleteWebHook'
+    r = requests.get(bot_url + method)
+    if r.status_code == 200:
+        method = 'setWebHook' + '?url=https://{}'.format(web_hook)
+        r = requests.get(bot_url + method)
+        if r.status_code == 200:
+            print("set webhook")
 
 
 class Telegram:
@@ -25,8 +30,10 @@ class Telegram:
             "text": message
         }
 
-        message_url = bot_url+'sendMessage'
-        requests.post(message_url, json=json_data)
+        message_url = self.bot_url+'sendMessage'
+        r = requests.post(message_url, json=json_data)
+        print(r.url)
+        print(r.status_code)
 
     def handle_request(self, data):
         self.chat_id = data['message']['chat']['id']
@@ -43,15 +50,21 @@ class Telegram:
             self.reply("Only Text")
 
 
-@app.route('/')
-def main():
+@app.route('/', methods=['POST'])
+def post_route():
     data = request.get_json()
-    return "App running"
+    telegram.handle_request(data)
+    resp = jsonify(success=True)
+    return resp
+
+
+@app.route('/', methods=['GET'])
+def get_route():
+    return "<h1> App is running </h1>"
 
 
 if __name__ == '__main__':
     telegram = Telegram()
-    set_webhook()
     print("App running")
 
     app.run(debug=True)
