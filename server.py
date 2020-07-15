@@ -62,6 +62,7 @@ def get_route():
 
 if __name__ == '__main__':
     telegram = Telegram()
+    telegram.set_webhook()
     print("App running")
 
     app.run(debug=True)
