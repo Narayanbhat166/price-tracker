@@ -4,11 +4,7 @@ import requests
 app = Flask(__name__)
 
 bot_url = 'https://api.telegram.org/bot1291011387:AAEDG2wqE0t4XHbe_9RurkcJHJ_Fdw99rf8/'
-<<<<<<< HEAD
-web_hook = ''
-=======
 web_hook = 'https://price-tracker-bot.herokuapp.com/'
->>>>>>> c95a4a8fdb319b51c21d51f84f7af186040fd7cd
 
 
 def set_webhook():
