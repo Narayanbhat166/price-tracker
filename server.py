@@ -52,5 +52,6 @@ def main():
 if __name__ == '__main__':
     telegram = Telegram()
     set_webhook()
+    print("App running")
 
     app.run(debug=True, host='0.0.0.0')
