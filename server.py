@@ -40,9 +40,12 @@ class Telegram:
     def set_webhook(self):
         method = 'deleteWebHook'
         r = requests.get(self.bot_url + method)
+        print(r.json())
         if r.status_code == 200:
-            method = 'setWebHook' + '?url=https://{}'.format(self.web_hook)
+            method = 'setWebHook' + '?url={0}'.format(self.web_hook)
             r = requests.get(self.bot_url + method)
+            print(r.url)
+            print(r.json())
             if r.status_code == 200:
                 print("set webhook")
 
@@ -60,8 +63,10 @@ def get_route():
     return "<h1> App is running </h1>"
 
 
+telegram = Telegram()
+
+
 if __name__ == '__main__':
-    telegram = Telegram()
     telegram.set_webhook()
     print("App running")
 
