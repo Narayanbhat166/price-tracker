@@ -3,19 +3,6 @@ import requests
 
 app = Flask(__name__)
 
-bot_url = 'https://api.telegram.org/bot1291011387:AAEDG2wqE0t4XHbe_9RurkcJHJ_Fdw99rf8/'
-web_hook = 'https://price-tracker-bot.herokuapp.com/'
-
-
-def set_webhook():
-    method = 'deleteWebHook'
-    r = requests.get(bot_url + method)
-    if r.status_code == 200:
-        method = 'setWebHook' + '?url=https://{}'.format(web_hook)
-        r = requests.get(bot_url + method)
-        if r.status_code == 200:
-            print("set webhook")
-
 
 class Telegram:
     def __init__(self):
@@ -23,6 +10,7 @@ class Telegram:
         self.sender = ''
         self.text = ''
         self.bot_url = 'https://api.telegram.org/bot1291011387:AAEDG2wqE0t4XHbe_9RurkcJHJ_Fdw99rf8/'
+        self.web_hook = 'https://price-tracker-bot.herokuapp.com/'
 
     def reply(self, message):
         json_data = {
@@ -48,6 +36,15 @@ class Telegram:
 
         else:
             self.reply("Only Text")
+
+    def set_webhook(self):
+        method = 'deleteWebHook'
+        r = requests.get(self.bot_url + method)
+        if r.status_code == 200:
+            method = 'setWebHook' + '?url=https://{}'.format(self.web_hook)
+            r = requests.get(self.bot_url + method)
+            if r.status_code == 200:
+                print("set webhook")
 
 
 @app.route('/', methods=['POST'])
