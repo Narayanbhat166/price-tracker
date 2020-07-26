@@ -93,10 +93,15 @@ class Telegram:
                 message = f"Title: {title}\n\nPrice: {display_price}\n\nRated by: {ratings} Customers\n\nReviewed by: {reviews} Customers\n\nStars: {stars}\n\n\nYou will be updated about the product information whenever the price changes or everyday at a particular time"
                 self.reply(message)
 
+                products_from_amazon = Amazon.query.filter_by(user=user)
+                products_from_flipkart = Flipkart.query.filter_by(user=user)
+                message = f"You are currently tracking {products_from_amazon.count()} products from amazon and {products_from_flipkart.count()} products from flipkart. To list all the products use /list"
+                self.reply(message)
+
                 # insert into database
                 try:
                     product = Amazon(product_id=product_id,
-                                     title=title, url=url, owner=user.id, price=price, ratings=ratings, reviews=reviews, stars=stars, display_price=display_price)
+                                     title=title, url=url, owner=user.id, price=price, ratings=ratings, reviews=reviews, stars=stars, display_price=display_price, image_url=image_url)
                     db.session.add(product)
                     db.session.commit()
                 except Exception as e:
@@ -157,10 +162,15 @@ class Telegram:
                 message = f"Title: {title}\n\nPrice: {display_price}\n\nRated by: {ratings} Customers\n\nReviewed by: {reviews} Customers\n\nStars: {stars}\n\n\nYou will be updated about the product information whenever the price changes or everyday at a particular time"
                 self.reply(message)
 
+                products_from_amazon = Amazon.query.filter_by(user=user)
+                products_from_flipkart = Flipkart.query.filter_by(user=user)
+                message = f"You are currently tracking {products_from_amazon.count()} products from amazon and {products_from_flipkart.count()} products from flipkart. To list all the products use /list"
+                self.reply(message)
+
                 # insert into database
                 try:
                     product = Flipkart(product_id=product_id,
-                                       title=title, url=url, owner=user.id, price=price, ratings=ratings, reviews=reviews, stars=stars, display_price=display_price)
+                                       title=title, url=url, owner=user.id, price=price, ratings=ratings, reviews=reviews, stars=stars, display_price=display_price, image_url=image_url)
                     db.session.add(product)
                     db.session.commit()
                 except Exception as e:
