@@ -19,9 +19,16 @@ class Telegram:
             "text": message
         }
 
-        user = db.Query
-
         message_url = self.bot_url+'sendMessage'
+        r = requests.post(message_url, json=json_data)
+
+    def send_photo(self, url):
+        json_data = {
+            "chat_id": self.chat_id,
+            "photo": url
+        }
+
+        message_url = self.bot_url+'sendPhoto'
         r = requests.post(message_url, json=json_data)
 
     def handle_request(self, data):
@@ -79,6 +86,9 @@ class Telegram:
                 ratings = details['ratings']
                 reviews = details['reviews']
                 stars = details['stars']
+                image_url = details['image_url']
+
+                self.send_photo(image_url)
 
                 message = f"Title: {title}\n\nPrice: {display_price}\n\nRated by: {ratings} Customers\n\nReviewed by: {reviews} Customers\n\nStars: {stars}\n\n\nYou will be updated about the product information whenever the price changes or everyday at a particular time"
                 self.reply(message)
@@ -110,6 +120,9 @@ class Telegram:
                 ratings = details.ratings
                 reviews = details.reviews
                 stars = details.stars
+                image_url = details.image_url
+
+                self.send_photo(image_url)
 
                 message = f"Title: {title}\n\nPrice: {display_price}\n\nRated by: {ratings} Customers\n\nReviewed by: {reviews} Customers\n\nStars: {stars}\n\n\nYou will be updated about the product information whenever the price changes or everyday at a particular time"
                 self.reply(message)
@@ -137,6 +150,9 @@ class Telegram:
                 ratings = details['ratings']
                 reviews = details['reviews']
                 stars = details['stars']
+                image_url = details['image_url']
+
+                self.send_photo(image_url)
 
                 message = f"Title: {title}\n\nPrice: {display_price}\n\nRated by: {ratings} Customers\n\nReviewed by: {reviews} Customers\n\nStars: {stars}\n\n\nYou will be updated about the product information whenever the price changes or everyday at a particular time"
                 self.reply(message)
@@ -169,6 +185,9 @@ class Telegram:
                 ratings = details.ratings
                 reviews = details.reviews
                 stars = details.stars
+                image_url = details.image_url
+
+                self.send_photo(image_url)
 
                 message = f"Title: {title}\n\nPrice: {display_price}\n\nRated by: {ratings} Customers\n\nReviewed by: {reviews} Customers\n\nStars: {stars}\n\n\nYou will be updated about the product information whenever the price changes or everyday at a particular time"
                 self.reply(message)

@@ -21,7 +21,9 @@ class Flipkart(db.Model):
     stars = db.Column(db.Float)
     ratings = db.Column(db.BigInteger)
     reviews = db.Column(db.BigInteger)
+    image_url = db.Column(db.String(100))
     updates = db.Column(db.String(1000))
+
     owner = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
@@ -37,4 +39,5 @@ class Amazon(db.Model):
     ratings = db.Column(db.BigInteger)
     reviews = db.Column(db.BigInteger)
     updates = db.Column(db.String(1000))
+    image_url = db.Column(db.String(100))
     owner = db.Column(db.Integer, db.ForeignKey('user.id'))

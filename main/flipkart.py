@@ -19,6 +19,7 @@ def flipkart(product_id):
     numberof_ratings = 0
     numberof_reviews = 0
     stars = 0
+    image_url = ''
 
     # title
     try:
@@ -65,7 +66,16 @@ def flipkart(product_id):
         else:
             stars = 0
 
+    try:
+        img = page.find(class_='_3MF26o SGxMsH')
+        image_url = img.div['style'][21:-6]
+    except Exception as e:
+        print("Exception "+str(e)+" while scanning image for product "+product_id)
+        image_url = ''
+    else:
+        print("Image: ", image_url)
+
     result = {"title": title, "price": price, "ratings": numberof_ratings,
-              "reviews": numberof_reviews, "stars": stars, "display_price": display_price}
+              "reviews": numberof_reviews, "stars": stars, "display_price": display_price, "image_url": image_url}
 
     return result

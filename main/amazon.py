@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import json
 
 
 def amazon(product_id):
@@ -21,6 +22,7 @@ def amazon(product_id):
     display_price = '0'
     numberof_ratings = 0
     stars = 0
+    image_url = ''
 
     result_page = requests.get(url=url, headers=headers)
     page = BeautifulSoup(result_page.text, 'html.parser')
@@ -83,7 +85,18 @@ def amazon(product_id):
     else:
         print("Ratings: ", numberof_ratings)
 
+    try:
+        url = page.find(id='landingImage')
+        url = url["data-a-dynamic-image"]
+        url = json.loads(url)
+        url = url.popitem()[0]
+    except Exception as e:
+        print("Last error", e)
+    else:
+        print("Image: ", url)
+        image_url = url
+
     result = {"title": title, "price": price, "ratings": numberof_ratings,
-              "reviews": numberof_ratings, "stars": stars, "display_price": display_price}
+              "reviews": numberof_ratings, "stars": stars, "display_price": display_price, "image_url": image_url}
 
     return result
