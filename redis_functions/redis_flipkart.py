@@ -51,7 +51,7 @@ def update_flipkart(product_id):
         diff = new_details['reviews'] - old_details.reviews
         message += str(diff)+" New reviews\n"
 
-        old_details.ratings = new_details['ratings']
+        old_details.reviews = new_details['reviews']
         db.session.commit()
 
     if new_details['stars'] != old_details.stars:
