@@ -17,20 +17,14 @@ def get_route():
     return "<h1> App is running </h1>"
 
 
-@app.route('/create-db', methods=['GET'])
+@app.route('/reset', methods=['GET'])
 def create_db():
+    db.drop_all()
+    db.session.commit()
     db.create_all()
     db.session.commit()
 
-    return "<h1> DB Created</h1?"
-
-
-@app.route('/drop-db', methods=['GET'])
-def drop_db():
-    db.drop_all()
-    db.session.commit()
-
-    return "<h1> DB Dropped</h1>"
+    return "<h1> DB Recreated</h1>"
 
 
 telegram = Telegram()
