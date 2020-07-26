@@ -210,8 +210,8 @@ class Telegram:
 
         if command == 'list':
             user = User.query.filter_by(chatid=self.chat_id).first()
-            products_from_amazon = Amazon.query.filter_by(user=user)
-            products_from_flipkart = Flipkart.query.filter_by(user=user)
+            products_from_amazon = Amazon.query.filter_by(owner=user)
+            products_from_flipkart = Flipkart.query.filter_by(owner=user)
 
             if products_from_flipkart.count() > 0:
                 message = f'Tracking {products_from_flipkart.count()} Products from flipkart\n\n'
