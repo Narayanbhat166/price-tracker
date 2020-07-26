@@ -25,7 +25,7 @@ def flipkart(product_id):
         title = page.find(class_="_35KyD6").text.strip()
     except Exception as e:
         print(
-            f"Exception {sr(e)} occured while getting product title for product "+product_id)
+            f"Exception {str(e)} occured while getting product title for product "+product_id)
     else:
         print("Title: ", title)
 
