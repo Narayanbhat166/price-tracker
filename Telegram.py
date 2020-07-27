@@ -22,10 +22,11 @@ class Telegram:
         message_url = self.bot_url+'sendMessage'
         r = requests.post(message_url, json=json_data)
 
-    def send_photo(self, url):
+    def send_photo(self, url, caption):
         json_data = {
             "chat_id": self.chat_id,
-            "photo": url
+            "photo": url,
+            "caption": caption
         }
 
         message_url = self.bot_url+'sendPhoto'
@@ -236,6 +237,15 @@ class Telegram:
                 message += "No products tracked from Flipkart"
 
             self.reply(message)
+
+        if command == 'start':
+            # send a welcome message and images
+            message = "Checking for your products frequently if there is a fall in price? Leave it to me. Share the link to the product which you want me to track, and i will be at your mercy"
+
+            self.reply(message)
+
+            self.send_photo('AgACAgUAAxkBAAIKDV8eY63HjpgcxHOZrnkZzYyWZbVXAAJBqjEbjfXxVD1y3wLyfl_VPN--anQAAwEAAwIAA3gAA0L2BQABGgQ',
+                            "As simple as this, Give it a try!")
 
     def set_webhook(self):
         method = 'deleteWebHook'
