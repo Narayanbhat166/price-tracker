@@ -11,7 +11,6 @@ class Telegram:
         self.sender = ''
         self.text = ''
         self.bot_url = 'https://api.telegram.org/bot1291011387:AAEDG2wqE0t4XHbe_9RurkcJHJ_Fdw99rf8/'
-        self.web_hook = 'https://price-tracker-bot.herokuapp.com/'
 
     def reply(self, message):
         json_data = {
@@ -39,12 +38,12 @@ class Telegram:
         self.text = data['message'].get('text')
 
         if User.query.filter_by(chatid=str(self.chat_id)).count() == 1:
-            self.reply("You are already in the database")
+            print("You are already in the database")
         else:
             user = User(name=self.sender, chatid=str(self.chat_id))
             db.session.add(user)
             db.session.commit()
-            self.reply("Added you into the database")
+            print("Added you into the database")
 
         if data["message"].get("entities") is not None:
             # print(data["message"].get("entities")[0].get('type'))
@@ -70,7 +69,7 @@ class Telegram:
         #print(url, title, user.name)
 
         if 'amazon' in url:
-            self.reply("product from amazon")
+            # self.reply("product from amazon")
             link = url.split('/')
             product_id = link[link.index('dp')+1]
 
@@ -78,31 +77,29 @@ class Telegram:
 
             if exists is None:
                 print("Prduct is new")
-                # get details from the internet
-                details = amazon(product_id)
+                # get product from the internet
+                product = amazon(product_id)
 
-                title = details['title']
-                price = details['price']
-                display_price = details['display_price']
-                ratings = details['ratings']
-                reviews = details['reviews']
-                stars = details['stars']
-                image_url = details['image_url']
+                title = product['title']
+                price = product['price']
+                display_price = product['display_price']
+                ratings = product['ratings']
+                reviews = product['reviews']
+                stars = product['stars']
+                image_url = product['image_url']
 
-                self.send_photo(image_url)
+                self.send_photo(
+                    image_url, "This is the one you told me to track!")
 
                 message = f"Title: {title}\n\nPrice: {display_price}\n\nRated by: {ratings} Customers\n\nReviewed by: {reviews} Customers\n\nStars: {stars}\n\n\nYou will be updated about the product information whenever the price changes or everyday at a particular time"
-                self.reply(message)
-
-                products_from_amazon = Amazon.query.filter_by(user=user)
-                products_from_flipkart = Flipkart.query.filter_by(user=user)
-                message = f"You are currently tracking {products_from_amazon.count()} products from amazon and {products_from_flipkart.count()} products from flipkart. To list all the products use /list"
                 self.reply(message)
 
                 # insert into database
                 try:
                     product = Amazon(product_id=product_id,
-                                     title=title, url=url, owner=user.id, price=price, ratings=ratings, reviews=reviews, stars=stars, display_price=display_price, image_url=image_url)
+                                     title=title, url=url, price=price, ratings=ratings, reviews=reviews, stars=stars, display_price=display_price, image_url=image_url)
+                    product.user.append(user)
+                    user.amazon_products.append(product)
                     db.session.add(product)
                     db.session.commit()
                 except Exception as e:
@@ -112,31 +109,55 @@ class Telegram:
                     # added product successfully
                     self.reply("Added product into the database")
                     print("Added product into the database")
+                    products_from_amazon = Amazon.query.filter(
+                        Amazon.user.contains(user))
+                    products_from_flipkart = Flipkart.query.filter(
+                        Flipkart.user.contains(user))
+                message = f"You are currently tracking {products_from_amazon.count()} products from amazon and {products_from_flipkart.count()} products from flipkart. To list all the products use /list"
+                self.reply(message)
 
             else:
                 print("Product already exists in the database")
                 self.reply("Someone else is already tracking this product!")
-                # get details from the database
 
-                details = Amazon.query.filter_by(product_id=product_id).first()
+                # get product from the database
+                # check if the same user is tracking the product
 
-                title = details.title
-                price = details.price
-                display_price = details.display_price.replace('?', '₹')
-                ratings = details.ratings
-                reviews = details.reviews
-                stars = details.stars
-                image_url = details.image_url
+                products_from_amazon = Amazon.query.filter(
+                    Amazon.user.contains(user)).all()
 
-                self.send_photo(image_url)
+                product = exists
 
-                message = f"Title: {title}\n\nPrice: {display_price}\n\nRated by: {ratings} Customers\n\nReviewed by: {reviews} Customers\n\nStars: {stars}\n\n\nYou will be updated about the product information whenever the price changes or everyday at a particular time"
-                self.reply(message)
+                if product in products_from_amazon:
+                    self.reply(
+                        "You are already tracking the product, asshole!")
+                else:
 
-                products_from_amazon = Amazon.query.filter_by(user=user)
-                products_from_flipkart = Flipkart.query.filter_by(user=user)
-                message = f"You are currently tracking {products_from_amazon.count()} products from amazon and {products_from_flipkart.count()} products from flipkart. To list all the products use /list"
-                self.reply(message)
+                    product = exists
+
+                    title = product.title
+                    price = product.price
+                    display_price = product.display_price.replace('?', '₹')
+                    ratings = product.ratings
+                    reviews = product.reviews
+                    stars = product.stars
+                    image_url = product.image_url
+
+                    product.user.append(user)
+                    db.session.commit()
+
+                    self.send_photo(
+                        image_url, "This is the one you told me to track!")
+
+                    message = f"Title: {title}\n\nPrice: {display_price}\n\nRated by: {ratings} Customers\n\nReviewed by: {reviews} Customers\n\nStars: {stars}\n\n\nYou will be updated about the product information whenever the price changes or everyday at a particular time"
+                    self.reply(message)
+
+                    products_from_amazon = Amazon.query.filter(
+                        Amazon.user.contains(user))
+                    products_from_flipkart = Flipkart.query.filter(
+                        Flipkart.user.contains(user))
+                    message = f"You are currently tracking {products_from_amazon.count()} products from amazon and {products_from_flipkart.count()} products from flipkart. To list all the products use /list"
+                    self.reply(message)
 
         elif 'flipkart' in url:
             self.reply("Product from Flipkart")
@@ -147,31 +168,29 @@ class Telegram:
 
             if exists is None:
                 print("Prduct is new")
-                # get details from the internet
-                details = flipkart(product_id)
+                # get product from the internet
+                product = flipkart(product_id)
 
-                title = details['title']
-                price = details['price']
-                display_price = details['display_price']
-                ratings = details['ratings']
-                reviews = details['reviews']
-                stars = details['stars']
-                image_url = details['image_url']
+                title = product['title']
+                price = product['price']
+                display_price = product['display_price']
+                ratings = product['ratings']
+                reviews = product['reviews']
+                stars = product['stars']
+                image_url = product['image_url']
 
-                self.send_photo(image_url)
+                self.send_photo(
+                    image_url, "This is the one you told me to track!")
 
                 message = f"Title: {title}\n\nPrice: {display_price}\n\nRated by: {ratings} Customers\n\nReviewed by: {reviews} Customers\n\nStars: {stars}\n\n\nYou will be updated about the product information whenever the price changes or everyday at a particular time"
-                self.reply(message)
-
-                products_from_amazon = Amazon.query.filter_by(user=user)
-                products_from_flipkart = Flipkart.query.filter_by(user=user)
-                message = f"You are currently tracking {products_from_amazon.count()} products from amazon and {products_from_flipkart.count()} products from flipkart. To list all the products use /list"
                 self.reply(message)
 
                 # insert into database
                 try:
                     product = Flipkart(product_id=product_id,
-                                       title=title, url=url, owner=user.id, price=price, ratings=ratings, reviews=reviews, stars=stars, display_price=display_price, image_url=image_url)
+                                       title=title, url=url, price=price, ratings=ratings, reviews=reviews, stars=stars, display_price=display_price, image_url=image_url)
+                    product.user.append(user)
+                    user.flipkart_products.append(product)
                     db.session.add(product)
                     db.session.commit()
                 except Exception as e:
@@ -181,27 +200,53 @@ class Telegram:
                     # added product successfully
                     self.reply("Added product into the database")
                     print("Added product into the database")
+                    products_from_amazon = Amazon.query.filter(
+                        Amazon.user.contains(user))
+                    products_from_flipkart = Flipkart.query.filter(
+                        Flipkart.user.contains(user))
+                    message = f"You are currently tracking {products_from_amazon.count()} products from amazon and {products_from_flipkart.count()} products from flipkart. To list all the products use /list"
+                    self.reply(message)
 
             else:
                 print("Product already exists in the database")
                 self.reply("Someone else is already tracking this product!")
-                # get details from the database
+                # get product from the database
+                # check if the same user is trying to track the product again, Damn user!
 
-                details = Flipkart.query.filter_by(
-                    product_id=product_id).first()
+                products_from_flipkart = Flipkart.query.filter(
+                    Flipkart.user.contains(user)).all()
 
-                title = details.title
-                price = details.price
-                display_price = details.display_price.replace('?', '₹')
-                ratings = details.ratings
-                reviews = details.reviews
-                stars = details.stars
-                image_url = details.image_url
+                product = exists
 
-                self.send_photo(image_url)
+                if product in products_from_flipkart:
+                    self.reply(
+                        "You are already tracking the product, asshole!")
+                else:
 
-                message = f"Title: {title}\n\nPrice: {display_price}\n\nRated by: {ratings} Customers\n\nReviewed by: {reviews} Customers\n\nStars: {stars}\n\n\nYou will be updated about the product information whenever the price changes or everyday at a particular time"
-                self.reply(message)
+                    title = product.title
+                    price = product.price
+                    display_price = product.display_price.replace('?', '₹')
+                    ratings = product.ratings
+                    reviews = product.reviews
+                    stars = product.stars
+                    image_url = product.image_url
+
+                    # Add user to the product
+                    product.user.append(user)
+                    db.session.commit()
+
+                    self.send_photo(
+                        image_url, "This is the one you told me to track!")
+
+                    message = f"Title: {title}\n\nPrice: {display_price}\n\nRated by: {ratings} Customers\n\nReviewed by: {reviews} Customers\n\nStars: {stars}\n\n\nYou will be updated about the product information whenever the price changes or everyday at a particular time"
+                    self.reply(message)
+
+                    products_from_amazon = Amazon.query.filter(
+                        Amazon.user.contains(user))
+                    products_from_flipkart = Flipkart.query.filter(
+                        Flipkart.user.contains(user))
+                    message = f"You are currently tracking {products_from_amazon.count()} products from amazon and {products_from_flipkart.count()} products from flipkart. To list all the products use /list"
+                    self.reply(message)
 
         else:
             self.reply("Product not recognized")
@@ -211,13 +256,22 @@ class Telegram:
 
         if command == 'list':
             user = User.query.filter_by(chatid=self.chat_id).first()
-            products_from_amazon = Amazon.query.filter_by(owner=user)
-            products_from_flipkart = Flipkart.query.filter_by(owner=user)
+            products_from_amazon = Amazon.query.filter(
+                Amazon.user.contains(user))
+            products_from_flipkart = Flipkart.query.filter(
+                Flipkart.user.contains(user))
+            message = ''
+
+            if products_from_amazon.count() == 0:
+                message = "No products tracked from Amazon\n\n"
+
+            if products_from_flipkart.count() == 0:
+                message = "No products tracked from Flipkart"
 
             if products_from_flipkart.count() > 0:
-                message = f'Tracking {products_from_flipkart.count()} Products from flipkart\n\n'
+                message += f'Tracking {products_from_flipkart.count()} Products from flipkart\n\n'
 
-                for product in products_from_flipkart:
+                for product in products_from_flipkart.all():
                     price = product.display_price.replace('?', '₹')
                     message += f'Title: {product.title}\nPrice: {price}\n\n'
 
@@ -226,15 +280,9 @@ class Telegram:
             if products_from_amazon.count() > 0:
                 message += f'Tracking {products_from_amazon.count()} Products from Amazon\n\n'
 
-                for product in products_from_amazon:
+                for product in products_from_amazon.all():
                     price = product.display_price.replace('?', '₹')
                     message += f'Title: {product.title}\nPrice: {price}\n\n'
-
-            if products_from_amazon.count() == 0:
-                message += "No products tracked from Amazon"
-
-            if products_from_flipkart.count() == 0:
-                message += "No products tracked from Flipkart"
 
             self.reply(message)
 
@@ -247,12 +295,12 @@ class Telegram:
             self.send_photo('AgACAgUAAxkBAAIKDV8eY63HjpgcxHOZrnkZzYyWZbVXAAJBqjEbjfXxVD1y3wLyfl_VPN--anQAAwEAAwIAA3gAA0L2BQABGgQ',
                             "As simple as this, Give it a try!")
 
-    def set_webhook(self):
+    def set_webhook(self, web_hook):
         method = 'deleteWebHook'
         r = requests.get(self.bot_url + method)
         print(r.json())
         if r.status_code == 200:
-            method = 'setWebHook' + '?url={0}'.format(self.web_hook)
+            method = 'setWebHook' + '?url={0}'.format(web_hook)
             r = requests.get(self.bot_url + method)
             print(r.url)
             print(r.json())
