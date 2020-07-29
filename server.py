@@ -29,9 +29,8 @@ def create_db():
 
 telegram = Telegram()
 
-
 if __name__ == '__main__':
-    telegram.set_webhook()
+    telegram.set_webhook('https://8df96f0dad55.ngrok.io')
     print("App running")
 
     app.run(debug=True)

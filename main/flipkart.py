@@ -69,6 +69,10 @@ def flipkart(product_id):
     try:
         img = page.find(class_='_3MF26o SGxMsH')
         image_url = img.div['style'][21:-6]
+        print(image_url)
+        image_url = image_url.replace('/128', '/1280', 1)
+        image_url = image_url.replace('/128/', '/720/', 1)
+
     except Exception as e:
         print("Exception "+str(e)+" while scanning image for product "+product_id)
         image_url = ''

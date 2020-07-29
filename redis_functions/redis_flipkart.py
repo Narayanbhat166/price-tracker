@@ -67,8 +67,9 @@ def update_flipkart(product_id):
         old_details.updates = message
 
         # send the message to everyone subscribed
-        user = User.query.filter_by(id=old_details.owner).first()
-        reply(message, user.chatid)
+        users = old_details.user
+        for user in users:
+            reply(message, user.chatid)
 
         return message
     else:

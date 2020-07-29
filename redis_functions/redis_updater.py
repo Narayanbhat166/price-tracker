@@ -3,11 +3,18 @@ from rq import Queue
 import datetime
 import pytz
 import random
+import threading
+import requests
+from requests.exceptions import Timeout, ProxyError, TooManyRedirects
+
 
 from models import Flipkart, Amazon, User
 
 from redis_functions.redis_amazon import update_amazon
 from redis_functions.redis_flipkart import update_flipkart
+
+redis_connection = Redis(host="pearlfish.redistogo.com", port=10453,
+                         password="6b7025eac8f3f18072d7496c96d8e8c5", username="redistogo")
 
 
 class Time:
@@ -27,12 +34,10 @@ class Time:
 
 
 def update_db():
-    redis_connection = Redis(host="pearlfish.redistogo.com", port=10453,
-                             password="6b7025eac8f3f18072d7496c96d8e8c5", username="redistogo")
-    q = Queue('test_queue', connection=redis_connection)
+    global redis_connection
+    q = Queue('scrapper', connection=redis_connection)
 
     time = Time()
-
     products = Amazon.query.all()
 
     for product in products:

@@ -1,6 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+from redis import Redis
+redis_connection = Redis(host="pearlfish.redistogo.com", port=10453,
+                         password="6b7025eac8f3f18072d7496c96d8e8c5", username="redistogo")
 
 
 def amazon(product_id):
